@@ -140,16 +140,16 @@ class HistElementContainer:
     #dbgprint("Adding element " + str(uid))
     #do not add element if it already exists
     #if self.get_element(uid,'email') == -1 :
-      el = HistElement(self.outputdir)
-      el.from_message_no_items(uid,msg)
-      return el
+    el = HistElement(self.outputdir)
+    el.from_message_no_items(uid,msg)
+    return el
 
   def add_element(self,el):
-      self.histelements.append(el)
-      self.sort_history()
-      self.save_history()
-      if self.actualelement == -1:
-        self.actualelement=len(self.histelements)-1
+    self.histelements.append(el)
+    self.sort_history()
+    self.save_history()
+    if self.actualelement == -1:
+      self.actualelement=len(self.histelements)-1
     #else:
       #dbgprint("Not adding email with uid", uid, ". Element already exists.")
 
@@ -174,6 +174,12 @@ class HistElementContainer:
     for filename in glob.glob(self.outputdir + "/" + str(uid)+ "_*"):
       os.remove(filename)
     self.save_history()
+
+  def has_unread_items(self):
+    for el in self.histelements:
+      if el.is_read() == 0:
+        return True
+    return False
 
   def to_string(self):
     dbgprint("History Container:")

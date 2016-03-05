@@ -28,6 +28,7 @@ class HistElement:
     self.actualitem = 0
     self.gsm_path = os.path.join(self.outputdir,'gsm_ref.txt')
     self.get_gsm_numbers()
+    self.read = 1 ; #0 if not read
 
   def get_previous_item(self):
     if len(self.get_items()) == 0:
@@ -43,17 +44,24 @@ class HistElement:
     if self.actualitem+1 == len(self.get_items()):
       return -1
     self.actualitem +=1
+    #if last element , mark as read
+    if self.actualitem+1 == len(self.get_items()):
+      self.read = 1
     return self.get_items()[self.actualitem]
 
   def get_first_item(self):
     if len(self.get_items()) == 0:
       return -1
     self.actualitem = 0
+    #if only element, mark as read
+    if len(self.get_items()) == 1:
+      self.read = 1
     return self.get_items()[self.actualitem]
     
   def get_last_item(self):
     if len(self.get_items()) == 0:
       return -1
+    self.read = 1
     self.actualitem = len(self.get_items())-1
     return self.get_items()[self.actualitem]
 
@@ -71,6 +79,9 @@ class HistElement:
   def set_outputdir(self, odir):
     self.outputdir = odir
 
+  def is_read(self):
+    return self.read == 1
+
   def get_nr_items(self):
     return len(self.get_items())
 
@@ -84,6 +95,7 @@ class HistElement:
     self.date    = msg['Date']
     self.fromm   = msg['From']
     #self.subject = str(quopri.decodestring(msg['Subject']).decode('utf-8')).strip()
+    self.read    = 0
     try:
       self.subject = decode_header(msg['Subject'])[0][0].decode('utf-8')
     except:
@@ -93,7 +105,7 @@ class HistElement:
 
   def from_history_no_items(self, histstring):
     strings = histstring.split(self.historydelim)
-    if len(strings) != 6 :
+    if len(strings) < 6 :
       dbgprint("ERROR: length histstings is "+str(len(strings))+": " + histstring )
       return -1
     self.typeke  = strings[0]
@@ -102,6 +114,9 @@ class HistElement:
     self.uid     = int(strings[3])
     self.fromm   = strings[4]
     self.subject = strings[5]
+    self.read    = 1
+    if len(strings) >= 7 :
+      self.read    = int(strings[6])
     return 0
 
   def from_sms(self, smsgsm, smsid, smscontent, smsdate):
@@ -111,6 +126,7 @@ class HistElement:
     self.time = int(time.mktime(datetime.datetime.strptime(smsdate,'%Y-%m-%d %H:%M:%S').timetuple()))
     self.fromm = smsgsm
     self.subject = ""
+    self.read = 0
     res = self.create_body(smscontent)
     return res
 
@@ -231,7 +247,8 @@ class HistElement:
     line += self.date       + self.historydelim 
     line += str(self.uid)   + self.historydelim 
     line += self.fromm      + self.historydelim 
-    line += self.subject.strip()    
+    line += self.subject.strip()  + self.historydelim 
+    line += str(self.read)
     if not compact:
       line += "items: "
       for item in self.get_items():

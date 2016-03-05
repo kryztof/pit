@@ -323,7 +323,10 @@ class PIT:
 
     s2 = ""
     if self.histcontainer.has_next_item():
-      s2 = self.draw_button(0)
+      if self.histcontainer.has_unread_items():
+        s2 = self.draw_button(0,(255,0,0))
+      else:
+        s2 = self.draw_button(0)
     else:
       #dbgprint("clearing right")
       s2 = self.clear_button(0)
@@ -336,15 +339,15 @@ class PIT:
     surface.fill((255,255,255))
     return surface
 
-  def draw_button(self,left):
+  def draw_button(self,left,color=(100,200,50)):
     #dbgprint("drawing button")
     surface = Surface(self.buttonsize)
     surface.fill((255,255,255))
     if left:
-      pygame.draw.polygon(surface,(100,200,50),
+      pygame.draw.polygon(surface,color,
         ((0,self.buttonsize[1]/2),(self.buttonsize[0],0),(self.buttonsize[0],self.buttonsize[1])))
     else:
-      pygame.draw.polygon(surface,(100,200,50),
+      pygame.draw.polygon(surface,color,
         ((self.buttonsize[0],self.buttonsize[1]/2),(0,0),(0,self.buttonsize[1])))
     return surface
 
