@@ -54,7 +54,7 @@ class EmailReader:
   def login(self):
     self.imap = imaplib.IMAP4_SSL('imap.gmail.com')
     try:
-      self.imap.login('raymondevdbc@gmail.com', "pourgranny");
+      self.imap.login(self.email, self.pw);
       return 0
     except imaplib.IMAP4.error:
       dbgprint("LOGIN FAILED!!! ")
