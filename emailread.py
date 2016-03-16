@@ -128,6 +128,7 @@ class EmailReader:
     if self.histcontainer.get_nr_elements('email') > 0:
       lastmessage = self.histcontainer.get_last_element('email').get_uid()
 
+    #lastmessage = 35
     dbgprint("last element uid: " + str(lastmessage))
 
     #loop over all messages and download new ones
