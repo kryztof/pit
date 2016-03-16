@@ -130,17 +130,76 @@ class HistElement:
     res = self.create_body(smscontent)
     return res
 
+  def get_body_decode_info(self,body):
+    contentcharset = ""
+    contentencoding = ""
+    counter = 0
+    for line in body.splitlines(True):
+      line = line.lower()
+      if "content-type" in line and contentcharset == "":
+        if "charset=" in line:
+          place = line.find("charset=")
+          line = line[place:].split('=')[1]
+          if ";" in line:
+            place = line.find(";")
+            line = line.split(';')[0]
+          contentcharset = line.strip()
+          counter+=1
+
+      if "content-transfer-encoding:" in line and contentencoding == "":
+        place = line.find("content-transfer-encoding:")
+        line = line[place:].split(':')[1]
+        contentencoding = line.strip()
+        counter+=1
+
+      if counter == 2:
+        break;
+    if contentcharset== "" :
+      charset = "utf-8"
+    if contentencoding == "" :
+      contentencoding = "quoted-printable"
+    return (contentcharset,contentencoding)
+
+  #body only is the body without the header info
+  def decode_body(self, bodyonly, charset, encoding):
+    new_body = ""
+    if encoding=="base64":
+      try :
+        new_body = base64.b64decode(bodyonly)
+      except:
+        dbgprint("into except base64")
+        pass
+    elif encoding=="quoted-printable" :
+      try:
+        #new_body = decode_header(new_body)[0][0].decode('utf-8')
+        #new_body = str(quopri.decodestring(new_body).decode('utf-8')).strip()
+        new_body = quopri.decodestring(bodyonly)
+      except:
+        dbgprint("into except qp")
+        pass
+    else :
+      new_body = bodyonly
+      dbgprint("unknown encoding:", encoding)
+
+    #now decode the charset
+    try :
+      new_body = new_body.decode(charset)
+    except:
+      #make sure a string is passed, also if failed
+      new_body = "".join(map(chr,new_body))
+      dbgprint("decoding failed")
+      pass
+    return new_body
+    
+    
   def create_body(self,body):
     #dbgprint("body is" , body)
     new_body = ""
-    decode=False
-    #this base 64 is important to interprete accents!
+    charset,encoding = self.get_body_decode_info(body)
+
+    #get body only content, without header info
     for line in body.splitlines(True):
       #dbgprint("line is", line)
-      if "Content-" in line and "base64" in line:
-        #dbgprint("decode true")
-        decode=True
-      #as long as there is more header info: clear the new_body
       if "Content-" in line:
         #dbgprint("clearing")
         new_body = ""
@@ -149,15 +208,8 @@ class HistElement:
         new_body+=line
     #dbgprint("New_body is", new_body,"--")
     new_body = new_body.strip()
-    if decode:
-      new_body = str(base64.b64decode(new_body),'utf-8')
-    else :
-      try:
-        #new_body = decode_header(new_body)[0][0].decode('utf-8')
-        new_body = str(quopri.decodestring(new_body).decode('utf-8')).strip()
-      except:
-        pass
 
+    new_body = self.decode_body(new_body,charset,encoding)
     new_body = new_body.strip()
     #dbgprint("New_body 2 is",len(new_body), ":", new_body,"--")
     if new_body != "":
