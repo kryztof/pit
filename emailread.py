@@ -44,9 +44,20 @@ class EmailReader:
       self.fetching_mail = 1
       dbgprint("#############################")
       dbgprint("Fetching emails!")
-      if self.login() == 0 :
-        self.open_mailbox()
-        self.logout()
+      try:
+        if self.login() == 0 :
+          self.open_mailbox()
+          self.logout()
+      except:
+        try:
+          self.logout()
+        except:
+          pass
+        dbgprint("EXCEPTION DURING FETCHING EMAILS:");
+        dbgprint(sys.exc_info()[0])
+        dbgprint(sys.exc_info()[1])
+        dbgprint(sys.exc_info()[2])
+
       dbgprint("Fetching emails done!")
       dbgprint("#############################")
       self.fetching_mail = 0
