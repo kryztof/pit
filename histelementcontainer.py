@@ -168,9 +168,9 @@ class HistElementContainer:
   def add_element(self,el):
     #if the element exists in list -> delete it
     # body and attachemnt is not deleted as these are overwritten
-    for el in self.histelements:
-      if el.get_uid() == uid :
-        self.histelements.remove(el)
+    for ele in self.histelements:
+      if ele.get_uid() == el.uid :
+        self.histelements.remove(ele)
     #now add the element
     self.histelements.append(el)
     self.sort_history()
