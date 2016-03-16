@@ -19,7 +19,12 @@ class HistElementContainer:
   def get_next_item(self):
     if self.actualelement == -1:
       return -1
-    item = self.histelements[self.actualelement].get_next_item()
+    #next can happen when element is deleted (from browser f.e.)
+    if self.actualelement >= len(self.histelements) :
+      self.actualelement = len(self.histelements)-1
+      item = self.histelements[self.actualelement].get_first_item()
+    else:
+      item = self.histelements[self.actualelement].get_next_item()
     if item != -1:
       return item
     else:
@@ -33,7 +38,12 @@ class HistElementContainer:
   def get_previous_item(self):
     if self.actualelement == -1:
       return -1
-    item = self.histelements[self.actualelement].get_previous_item()
+    #next can happen when element is deleted (from browser f.e.)
+    if self.actualelement >= len(self.histelements) :
+      self.actualelement = len(self.histelements)-1
+      item = self.histelements[self.actualelement].get_first_item()
+    else:
+      item = self.histelements[self.actualelement].get_previous_item()
     if item != -1:
       return item
     else:
@@ -44,6 +54,10 @@ class HistElementContainer:
         return self.histelements[self.actualelement].get_last_item()
 
   def has_next_item(self):
+    # can happen when element gets deleted
+    if self.actualelement >= len(self.histelements):
+      self.actualelement = len(self.histelements)-1
+
     if len(self.histelements) > 0:
       el = self.histelements[self.actualelement]
       if len(self.histelements)-1 == self.actualelement and el.get_actual_item_nr() == el.get_nr_items()-1:
@@ -52,6 +66,10 @@ class HistElementContainer:
     return False
 
   def has_previous_item(self):
+    # can happen when element gets deleted
+    if self.actualelement >= len(self.histelements):
+      self.actualelement = len(self.histelements)-1
+
     if len(self.histelements) > 0:
       el = self.histelements[0]
       if 0 == self.actualelement and el.get_actual_item_nr() == 0:
@@ -64,6 +82,9 @@ class HistElementContainer:
       return -1
     if len(self.histelements) == 0:
       return -1
+    # can happen when element gets deleted
+    if self.actualelement >= len(self.histelements):
+      self.actualelement = len(self.histelements)-1
     return self.histelements[self.actualelement]
 
   def read_history(self):
@@ -145,6 +166,12 @@ class HistElementContainer:
     return el
 
   def add_element(self,el):
+    #if the element exists in list -> delete it
+    # body and attachemnt is not deleted as these are overwritten
+    for el in self.histelements:
+      if el.get_uid() == uid :
+        self.histelements.remove(el)
+    #now add the element
     self.histelements.append(el)
     self.sort_history()
     self.save_history()
