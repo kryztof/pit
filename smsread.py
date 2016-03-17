@@ -95,14 +95,14 @@ class SmsReader:
       return -1
 
     for page in self.smses:
-      dbgprint(page)
+      #dbgprint(page)
       root = ET.fromstring(page)
       for msg in root.iter('Messages'):
         for child in msg:
           nr = child.find('Phone').text
           content = child.find('Content').text
           date = child.find('Date').text
-          dbgprint("sms date:", date)
+          #dbgprint("sms date:", date)
           index = child.find('Index').text
           #smstype = child.find('SmsType').text
           self.histcontainer.add_element_from_sms(nr,index,content,date)
