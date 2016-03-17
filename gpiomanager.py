@@ -6,7 +6,7 @@ import RPi.GPIO as GPIO
 class GpioManager:
   def __init__(self):
     self.channels = [24,26]
-    GPIO.setWarnings(False)
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(self.channels, GPIO.OUT)
     GPIO.output(self.channels, 0)
