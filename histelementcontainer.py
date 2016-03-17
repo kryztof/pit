@@ -13,10 +13,20 @@ class HistElementContainer:
     self.historyfilename = "history.txt"
     self.historypath = os.path.join(self.outputdir,self.historyfilename)
     self.actualelement = -1
+    self.counteritemsread = -1
     self.read_history()
 
+  def do_history_save_when_item_set_to_read(self):
+    counter=0
+    for el in self.histelements:
+      if el.is_read() == 0:
+        counter+=1
+    if counter != self.counteritemsread:
+      self.counteritemsread = counter
+      self.save_history()
 
   def get_next_item(self):
+    self.do_history_save_when_item_set_to_read()
     if self.actualelement == -1:
       return -1
     #next can happen when element is deleted (from browser f.e.)
@@ -36,6 +46,7 @@ class HistElementContainer:
         return self.histelements[self.actualelement].get_first_item()
 
   def get_previous_item(self):
+    self.do_history_save_when_item_set_to_read()
     if self.actualelement == -1:
       return -1
     #next can happen when element is deleted (from browser f.e.)
