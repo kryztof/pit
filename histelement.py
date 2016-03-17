@@ -123,7 +123,9 @@ class HistElement:
     self.uid = int(smsid)
     self.typeke = 'sms'
     self.date = smsdate
-    self.time = int(time.mktime(datetime.datetime.strptime(smsdate,'%Y-%m-%d %H:%M:%S').timetuple()))
+    #as the time returned by the usb dongle is wrong -> use actual time
+    #self.time = int(time.mktime(datetime.datetime.strptime(smsdate,'%Y-%m-%d %H:%M:%S').timetuple()))
+    self.time = round(time.time()); #-> returns time in seconds
     self.fromm = smsgsm
     self.subject = ""
     self.read = 0
@@ -287,10 +289,15 @@ class HistElement:
     if self.typeke == 'sms':
       name = self.find_name_of_gsmnummer(self.fromm)
       if name != -1:
-        return name
+        return name + " (sms)"
       return self.fromm
     else:
-      return self.fromm.split('<')[0]
+      name = self.fromm.split('<')[0].strip()
+      if len(name) > 5:
+        return name + " (email)"
+      else:
+        return self.fromm
+
   def get_subject(self): return self.subject
 
   def to_string(self,compact):
@@ -356,14 +363,13 @@ class HistElement:
     if len(HistElement.gsmdict) >0 :
       return
     txt = ""
-    #dbgprint("self.gms_path", self.gsm_path)
-    with open(self.gsm_path,'a+') as fd:
+    with open(self.gsm_path,'r') as fd:
       for line in fd:
         strs = line.split(" ")
         gsm = strs[0].strip()
         del strs[0]
-        name = " ".join(strs)
-        if name.strip() != "":
+        name = " ".join(strs).strip()
+        if name != "":
           HistElement.gsmdict[name]=gsm
 
   def find_name_of_gsmnummer(self,gsmstr):
