@@ -15,6 +15,7 @@ from utils import *
 from histelementcontainer import *
 from histelement import *
 from smsread import *
+from gpiomanager import *
 
 class PIT:
   def __init__(self, historycontainer):
@@ -32,6 +33,8 @@ class PIT:
     #the offset below the y margin
     self.imageyoffset = 60
     self.buttonsize = (40, 70)
+    self.gpioManager = GpioManager()
+    self.gpioManager.leds_off()
 
   def start_screen(self):
     self.init_pygame_and_screen()
@@ -324,11 +327,15 @@ class PIT:
     s2 = ""
     if self.histcontainer.has_next_item():
       if self.histcontainer.has_unread_items():
+        self.gpioManager.leds_on()
         s2 = self.draw_button(0,(255,0,0))
       else:
+        self.gpioManager.leds_off()
         s2 = self.draw_button(0)
     else:
       #dbgprint("clearing right")
+      if not self.histcontainer.has_unread_items():
+        self.gpioManager.leds_off()
       s2 = self.clear_button(0)
 
     self.screen.blit(s2,(self.w-s2.get_size()[0],self.h/2-s2.get_size()[1]/2))
@@ -396,12 +403,12 @@ if __name__ == '__main__':
   #smsReader.fetch_smses()
 
   stop_fetch_mail = call_repeatedly(10,emailReader.fetch_mail)
-  #stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
+  stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
   try:
     pit = PIT(historycontainer)
     pit.start_screen()
   finally:
     stop_fetch_mail() 
-    #stop_fetch_sms()
+    stop_fetch_sms()
     pass
 
