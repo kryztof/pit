@@ -13,13 +13,13 @@ class HistElementContainer:
     self.historyfilename = "history.txt"
     self.historypath = os.path.join(self.outputdir,self.historyfilename)
     self.actualelement = -1
-    self.counteritemsread = -1
+    self.counteritemsread = 0
     self.read_history()
 
   def do_history_save_when_item_set_to_read(self):
     counter=0
     for el in self.histelements:
-      if el.is_read() == 0:
+      if el.is_read() == True:
         counter+=1
     if counter != self.counteritemsread:
       self.counteritemsread = counter
@@ -110,6 +110,7 @@ class HistElementContainer:
         res = histEl.from_history_no_items(line)
         if res != -1 :
           self.histelements.append(histEl)
+          self.counteritemsread +=1
         else:
           dbgprint("ERROR in history file, skipping element: '" + line + "'")
       self.sort_history()
