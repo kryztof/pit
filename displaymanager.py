@@ -26,13 +26,13 @@ class DisplayManager:
     self.check_for_sleep()
 
   def __del__(self):
-    dbgprint("del dm")
+    #dbgprint("del dm")
     self.bl_on()
     self.fd.close()
 
   def check_for_sleep(self):
     now = time.time()
-    dbgprint("now", now, "last action:", self.lastaction)
+    #dbgprint("now", now, "last action:", self.lastaction)
     if now - self.lastaction > 7*60 :
       self.bl_off()
 
