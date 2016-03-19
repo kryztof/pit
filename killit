@@ -1,0 +1,2 @@
+kill -n 9 $(ps a | grep pit.py | grep -v grep | cut -d\  -f 2)
+echo 0 > /sys/class/backlight/rpi_backlight/bl_power
