@@ -17,13 +17,12 @@ def call_repeatedly(interval, func, *args):
   Thread(target=loop).start()    
   return stopped.set
 
+dbgfp = open(dbgfile,'a+')
 def dbgprint(*arg):
   s = ' '.join(map(str,arg))
   print(s)
-  return
-  fp = open(dbgfile,'a+')
-  fp.write(s+'\n')
-  fp.close()
+  dbgfp.write(s+'\n')
+  #dbgfp.close()
 
 def get_screen_size(real = 0):
   debug = 1
