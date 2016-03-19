@@ -33,7 +33,7 @@ class DisplayManager:
   def check_for_sleep(self):
     now = time.time()
     dbgprint("now", now, "last action:", self.lastaction)
-    if now - self.lastaction > 1*60 :
+    if now - self.lastaction > 7*60 :
       self.bl_off()
 
   def reset_timer(self):

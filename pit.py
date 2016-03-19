@@ -16,14 +16,16 @@ from histelementcontainer import *
 from histelement import *
 from smsread import *
 from gpiomanager import *
+from displaymanager import *
 
 class PIT:
-  def __init__(self, historycontainer):
+  def __init__(self, historycontainer, displaymanager):
     self.presspos = (0,0);
     self.releasepos = (0,0);
     self.background_color = (255,255,255)
     self.linecolor = (150,150,150)
     self.histcontainer = historycontainer
+    self.displaymanager = displaymanager
     self.w,self.h = get_screen_size()
     self.roundboxmargin = (45,10)
     #the contentmargin is for left and write, to and bottom
@@ -70,6 +72,7 @@ class PIT:
   def touch_handler(self, event, touch):
     if event == TS_PRESS:
       self.presspos=(touch.x,touch.y)
+      self.displaymanager.reset_timer()
     if event == TS_RELEASE:
       self.releasepos=(touch.x,touch.y)
       res = self.check_swipe()
@@ -395,6 +398,7 @@ class PIT:
 if __name__ == '__main__':
   
   historycontainer = HistElementContainer()
+  displaymanager   = DisplayManager()
 
   emailReader = EmailReader(historycontainer)
   #emailReader.fetch_mail()
@@ -402,13 +406,17 @@ if __name__ == '__main__':
   smsReader = SmsReader(historycontainer)
   #smsReader.fetch_smses()
 
-  stop_fetch_mail = call_repeatedly(60,emailReader.fetch_mail)
+  stop_fetch_mail = call_repeatedly(5*60,emailReader.fetch_mail)
   stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
+  stop_check_bl = call_repeatedly(10, displaymanager.check_for_sleep)
   try:
-    pit = PIT(historycontainer)
+    pit = PIT(historycontainer, displaymanager)
+    #next doesn't return until escape is pressed
     pit.start_screen()
   finally:
+    stop_check_bl()
     stop_fetch_mail() 
     stop_fetch_sms()
-    pass
+    del displaymanager
+
 
