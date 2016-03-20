@@ -3,7 +3,7 @@ import time
 from threading import Event, Thread
 import os
 
-dbgfile="pit_dbg.log"
+dbgfile="/home/pi/pit2/pit_dbg.log"
 try: 
   os.remove(dbgfile)
 except:
@@ -25,7 +25,7 @@ def dbgprint(*arg):
   #dbgfp.close()
 
 def get_screen_size(real = 0):
-  debug = 1
+  debug = 0
   if debug == 1 and real == 0 : 
     return (400,220)
   else:
