@@ -15,6 +15,9 @@ import time
 from histelement import *
 from histelementcontainer import *
 from utils import *
+import pygame
+
+import traceback
 
 
 class EmailReader:
@@ -26,6 +29,7 @@ class EmailReader:
     self.pw = ""
     self.email = ""
     self.read_email_pw()
+
 
   def read_email_pw(self):
     path = "/etc/pit.conf"
@@ -44,9 +48,12 @@ class EmailReader:
       self.fetching_mail = 1
       dbgprint("#############################")
       dbgprint("Fetching emails!")
+      self.post_progress(10)
       try:
         if self.login() == 0 :
+          self.post_progress(30)
           self.open_mailbox()
+          self.post_progress(80)
           self.logout()
       except:
         try:
@@ -57,7 +64,9 @@ class EmailReader:
         dbgprint(sys.exc_info()[0])
         dbgprint(sys.exc_info()[1])
         dbgprint(sys.exc_info()[2])
+        traceback.print_stack()
 
+      self.post_progress(100)
       dbgprint("Fetching emails done!")
       dbgprint("#############################")
       self.fetching_mail = 0
@@ -78,6 +87,7 @@ class EmailReader:
     rv, mailboxes = self.imap.list()
     #if rv == 'OK': dbgprint( "Mailboxes:", mailboxes)
     rv, data = self.imap.select("INBOX",1) ; #true = readonly
+    self.post_progress(40)
     if rv == 'OK':
         dbgprint("Processing mailbox...")
         self.process_mailbox()
@@ -133,6 +143,7 @@ class EmailReader:
 
     #delete removed messages
     self.remove_deleted_msgs_from_history(data[0].split())
+    self.post_progress(50)
       
     #get last history uid
     lastmessage=0
@@ -143,25 +154,30 @@ class EmailReader:
     dbgprint("last element uid: " + str(lastmessage))
 
     #loop over all messages and download new ones
-    for uid in data[0].split():
-      if int(uid) <= lastmessage:
-        continue
-      rv, data = self.imap.uid('fetch', uid, '(RFC822)')
-      if rv != 'OK':
-        dbgprint("ERROR getting message " + uid)
-        continue
-      #dbgprint("New message UID: "+ str(int(uid))) 
-      msg = email.message_from_bytes(data[0][1])
-      msg2 = BytesParser(policy=policy.default).parsebytes(data[0][1])
-      #dbgprint("BODY:",msg2.get_body(),"------------------")
-      body = msg2.get_body(preferencelist=('plain', 'html'))
+    if (int(data[0].split()[-1])-lastmessage) > 0 :
+      progressstep = 30/(int(data[0].split()[-1])-lastmessage)
+      progressactual = 50
+      for uid in data[0].split():
+        if int(uid) <= lastmessage:
+          continue
+        rv, data = self.imap.uid('fetch', uid, '(RFC822)')
+        if rv != 'OK':
+          dbgprint("ERROR getting message " + uid)
+          continue
+        #dbgprint("New message UID: "+ str(int(uid))) 
+        msg = email.message_from_bytes(data[0][1])
+        msg2 = BytesParser(policy=policy.default).parsebytes(data[0][1])
+        #dbgprint("BODY:",msg2.get_body(),"------------------")
+        body = msg2.get_body(preferencelist=('plain', 'html'))
 
-      el = self.histcontainer.make_element_from_message(int(uid),msg)
-      self.process_body(str(body),el)
-      self.process_attachments(msg,el)
-      self.histcontainer.add_element(el)
+        el = self.histcontainer.make_element_from_message(int(uid),msg)
+        self.process_body(str(body),el)
+        self.process_attachments(msg,el)
+        self.histcontainer.add_element(el)
 
-      self.mark_msg_as_read(int(uid))
+        self.mark_msg_as_read(int(uid))
+        progressactual+=progressstep
+        self.post_progress(progressactual)
 
   def body_test(self,msg):
     text = ""
@@ -212,6 +228,9 @@ class EmailReader:
         #print(str(key) + ": " + str(msg[key])); 
     dbgprint("_________________________"); 
 
+  def post_progress(self, percentage):
+    emailprogressevent = pygame.event.Event(pygame.USEREVENT+3, progress=percentage)
+    pygame.event.post(emailprogressevent)
 
 #if __name__ == '__main__':
 #  emailReader = EmailReader()

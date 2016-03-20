@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from histelement import *
 from histelementcontainer import *
 from utils import *
-
+import pygame
 
 class SmsReader:
   def __init__(self,historycontainer):
@@ -23,11 +23,16 @@ class SmsReader:
     dbgprint("TTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
     dbgprint("Fetching sms!")
     self.reading = 1
+    self.post_progress(10)
     self.get_token()
+    self.post_progress(30)
     if self.token != -1:
       self.get_smses()
+      self.post_progress(60)
       self.parse_sms_answer()
+      self.post_progress(80)
     self.reading = 0
+    self.post_progress(100)
     dbgprint("Fetching sms done!")
     dbgprint("TTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
 
@@ -108,6 +113,10 @@ class SmsReader:
           self.histcontainer.add_element_from_sms(nr,index,content,date)
           #dbgprint (nr,index,smstype,content, date)
     return 0
+
+  def post_progress(self, percentage):
+    smsprogressevent = pygame.event.Event(pygame.USEREVENT+2, progress=percentage)
+    pygame.event.post(smsprogressevent)
 
 #if __name__ == '__main__':
 #  smsReader = SmsReader()
