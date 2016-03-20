@@ -24,6 +24,8 @@ class PIT:
     self.releasepos = (0,0);
     self.background_color = (255,255,255)
     self.linecolor = (150,150,150)
+    self.progresssmslinecolor   = (50,150,250)
+    self.progressemaillinecolor = (50,250,150)
     self.histcontainer = historycontainer
     self.displaymanager = displaymanager
     self.w,self.h = get_screen_size()
@@ -112,6 +114,12 @@ class PIT:
             sys.exit()
         if event.type == USEREVENT + 1:
           self.draw_left_right_buttons_if_needed()
+        elif event.type == USEREVENT + 2: #sms progress
+          #dbgprint("sms event received!", event.__dict__['progress'])
+          self.draw_progess_line('sms',event.__dict__['progress'])
+        elif event.type == USEREVENT + 3: #email progress
+          #dbgprint("email event received!", event.__dict__['progress'])
+          self.draw_progess_line('email',event.__dict__['progress'])
 
   def start_timer_from_new_items_check(self):
     pygame.time.set_timer(USEREVENT+1, 2000)
@@ -126,6 +134,24 @@ class PIT:
     self.AAfilledRoundedRect(self.screen,surf_rect,self.linecolor,0.1)
     #pygame.display.update(surf_rect)
     self.clear_rounded_rect()
+
+  def draw_progess_line(self, what, progress):
+    yoffset = 0
+    color = self.progressemaillinecolor
+    if what == 'sms' :
+      yoffset = 2
+      color = self.progresssmslinecolor
+
+    offset = (self.roundboxmargin[0] , self.h - self.roundboxmargin[1] + 1+yoffset)
+    pygame.draw.line(self.screen, self.background_color,
+      (offset[0], offset[1]),
+      (offset[0]+(self.w-2*self.roundboxmargin[0]), offset[1]),2)
+    # if progress is 100 the remove the progress line
+    if progress < 100 :
+      pygame.draw.line(self.screen, color,
+        (offset[0], offset[1]),
+        (offset[0]+(self.w-2*self.roundboxmargin[0])*progress/100, offset[1]),2)
+    display.update(offset[0],offset[1],self.w-2*self.roundboxmargin[0],2)
     
   def clear_rounded_rect(self):
     margin2 = (self.roundboxmargin[0]+1,self.roundboxmargin[1]+1)
@@ -386,7 +412,10 @@ class PIT:
         txt =self.histcontainer.get_actual_element().get_body_txt()
         self.show_body(txt)
       else:
-        self.show_image(res)
+        try :
+          self.show_image(res)
+        except :
+          self.show_body("Erreur: impossible de montrer l'image " + res + ".")
       self.draw_left_right_buttons_if_needed()
     else:
       dbgprint("No email to show!")
