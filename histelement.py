@@ -42,6 +42,7 @@ class HistElement:
     if len(self.get_items()) == 0:
       return -1
     if self.actualitem+1 == len(self.get_items()):
+      self.read = 1
       return -1
     self.actualitem +=1
     #if last element , mark as read
