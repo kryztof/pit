@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import time
+import threading
 from threading import Event, Thread
 import os
 
@@ -8,6 +9,15 @@ try:
   os.remove(dbgfile)
 except:
   pass
+
+def call_once (func, *args):
+  #event = Event()
+  #def once():
+  #  event.wait(10)
+  #  func(*args)
+  #Thread(target=once).start()    
+  #return event.set()
+  threading.Timer(10,func,*args).start()
 
 def call_repeatedly(interval, func, *args):
   stopped = Event()
