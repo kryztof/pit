@@ -434,6 +434,8 @@ if __name__ == '__main__':
 
   smsReader = SmsReader(historycontainer)
   #smsReader.fetch_smses()
+  call_once(emailReader.fetch_mail)
+  call_once(smsReader.fetch_smses)
 
   stop_fetch_mail = call_repeatedly(5*60,emailReader.fetch_mail)
   stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
