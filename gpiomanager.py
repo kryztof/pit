@@ -2,6 +2,7 @@
 
 import RPi.GPIO as GPIO
 import pygame
+from utils import *
 
 
 class GpioManager:
@@ -17,6 +18,7 @@ class GpioManager:
     GPIO.add_event_detect(self.channels[1], GPIO.FALLING, callback = self.callback, bouncetime=100)
 
   def callback(self,channel):
+    #dbgprint("gettting button input")
     if channel == 24 :
       buttonevent = pygame.event.Event(pygame.USEREVENT+4)
       pygame.event.post(buttonevent)

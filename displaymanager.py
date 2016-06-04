@@ -13,49 +13,70 @@ you should see :
 """
 
 import time, threading
+import os
 from utils import *
 import ft5406
 from ft5406 import Touchscreen, TS_PRESS, TS_RELEASE, TS_MOVE
 
 class DisplayManager:
-  ##def __init__(self):
-    #self.blpowerpath = "/sys/class/backlight/rpi_backlight/bl_power"
-    ##self.fd = open(self.blpowerpath,'r+')
-    ##self.lastaction = 0
-    ##self.reset_timer()
-    ##self.check_for_sleep()
+  def __init__(self):
+    self.ft = True ; # TRUE IF TOUCH SCREEN 
+    self.blpowerpath = "/sys/class/backlight/rpi_backlight/bl_power"
+    try:
+      self.fd = open(self.blpowerpath,'r+')
+    except:
+      self.ft = False
+    self.lastaction = 0
+    self.displaystate = 1 ; #1 in on, 0 is off
+
+    self.reset_timer()
+    self.check_for_sleep()
+
 
   def __del__(self):
     #dbgprint("del dm")
-    self.bl_on()
-    self.fd.close()
+    #self.display_on() -> generate exception ...
+    if self.ft:
+      self.fd.close()
 
   def check_for_sleep(self):
     now = time.time()
     #dbgprint("now", now, "last action:", self.lastaction)
     if now - self.lastaction > 7*60 :
-      self.bl_off()
+      self.display_off()
 
   def reset_timer(self):
     #dbgprint("reset timer", self.lastaction)
     self.lastaction =  time.time(); #-> returns time in seconds
-    self.bl_on()
+    if self.displaystate == 0 :
+      self.display_on()
 
   def init_touchscreen(self):
-    self.ts = ft5406.Touchscreen()
-    for touch in self.ts.touches:
-      touch.on_press = self.bl_on()
+    if self.ft :
+      self.ts = ft5406.Touchscreen()
+      for touch in self.ts.touches:
+        touch.on_press = self.display_on()
 
-  def bl_on(self):
-    self.fd.write('0'); 
-    self.fd.flush()
+  def display_on(self):
+    #dbgprint("display on")
+    self.displaystate = 1
+    if self.ft:
+      self.fd.write('0'); 
+      self.fd.flush()
+    else:
+      os.system("/opt/vc/bin/tvservice -p")
 
-  def bl_off(self):
-    self.fd.write('1'); 
-    self.fd.flush()
+  def display_off(self):
+    #dbgprint("display off")
+    self.displaystate = 0
+    if self.ft:
+      self.fd.write('1'); 
+      self.fd.flush()
+    else:
+      os.system("/opt/vc/bin/tvservice -o")
 
 #if __name__ == '__main__':
 #  displayManager = DisplayManager()
-#  displayManager.bl_off()
+#  displayManager.display_off()
 #  time.sleep(10)
-#  displayManager.bl_on()
+#  displayManager.display_on()

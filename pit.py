@@ -14,10 +14,10 @@ from histelementcontainer import *
 from histelement import *
 from smsread import *
 from gpiomanager import *
-#from displaymanager import *
+from displaymanager import *
 
 class PIT:
-  def __init__(self, historycontainer): #, displaymanager):
+  def __init__(self, historycontainer, displaymanager):
     self.presspos = (0,0);
     self.releasepos = (0,0);
     self.background_color = (255,255,255)
@@ -25,7 +25,7 @@ class PIT:
     self.progresssmslinecolor   = (50,150,250)
     self.progressemaillinecolor = (50,250,150)
     self.histcontainer = historycontainer
-    #self.displaymanager = displaymanager
+    self.displaymanager = displaymanager
     self.w,self.h = get_screen_size()
     self.roundboxmargin = (45,10)
     #the contentmargin is for left and write, to and bottom
@@ -81,8 +81,10 @@ class PIT:
           self.draw_progess_line('email',event.__dict__['progress'])
         elif event.type == USEREVENT + 4: #button
           self.get_next_previous_item(1)
+          self.displaymanager.reset_timer()
         elif event.type == USEREVENT + 5: #button
           self.get_next_previous_item(-1)
+          self.displaymanager.reset_timer()
 
   def start_timer_from_new_items_check(self):
     pygame.time.set_timer(USEREVENT+1, 2000)
@@ -391,28 +393,27 @@ class PIT:
 if __name__ == '__main__':
   
   historycontainer = HistElementContainer()
-  #displaymanager   = DisplayManager()
+  displaymanager   = DisplayManager()
 
   emailReader = EmailReader(historycontainer)
-  #emailReader.fetch_mail()
 
   smsReader = SmsReader(historycontainer)
-  #smsReader.fetch_smses()
 
+  #non blocking
   call_once(emailReader.fetch_mail)
   call_once(smsReader.fetch_smses)
 
-  stop_fetch_mail = call_repeatedly(5*60,emailReader.fetch_mail)
+  stop_fetch_mail = call_repeatedly(10*60,emailReader.fetch_mail)
   stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
-  #stop_check_bl = call_repeatedly(10, displaymanager.check_for_sleep)
+  stop_check_display = call_repeatedly(10, displaymanager.check_for_sleep)
   try:
-    pit = PIT(historycontainer); #, displaymanager)
+    pit = PIT(historycontainer, displaymanager)
     #next doesn't return until escape is pressed
     pit.start_screen()
   finally:
-    #stop_check_bl()
+    stop_check_display()
     stop_fetch_mail() 
     stop_fetch_sms()
-    #del displaymanager
+    del displaymanager
 
 
