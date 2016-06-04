@@ -39,7 +39,8 @@ def get_screen_size(real = 0):
   if debug == 1 and real == 0 : 
     return (400,220)
   else:
-    return (800,480)
+    #return (800,480)
+    return (1360,768)
 
 def get_aspect_scale(width,height,maxwidth,maxheight):
   """ Scales 'img' to fit into box maxwidth/maxheight.

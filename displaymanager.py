@@ -18,12 +18,12 @@ import ft5406
 from ft5406 import Touchscreen, TS_PRESS, TS_RELEASE, TS_MOVE
 
 class DisplayManager:
-  def __init__(self):
-    self.blpowerpath = "/sys/class/backlight/rpi_backlight/bl_power"
-    self.fd = open(self.blpowerpath,'r+')
-    self.lastaction = 0
-    self.reset_timer()
-    self.check_for_sleep()
+  ##def __init__(self):
+    #self.blpowerpath = "/sys/class/backlight/rpi_backlight/bl_power"
+    ##self.fd = open(self.blpowerpath,'r+')
+    ##self.lastaction = 0
+    ##self.reset_timer()
+    ##self.check_for_sleep()
 
   def __del__(self):
     #dbgprint("del dm")

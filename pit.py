@@ -5,8 +5,6 @@ import pygame
 from pygame import *
 from pygame.locals import *
 import time
-import ft5406
-from ft5406 import Touchscreen, TS_PRESS, TS_RELEASE, TS_MOVE
 import sys
 import os
 #import exifread
@@ -16,10 +14,10 @@ from histelementcontainer import *
 from histelement import *
 from smsread import *
 from gpiomanager import *
-from displaymanager import *
+#from displaymanager import *
 
 class PIT:
-  def __init__(self, historycontainer, displaymanager):
+  def __init__(self, historycontainer): #, displaymanager):
     self.presspos = (0,0);
     self.releasepos = (0,0);
     self.background_color = (255,255,255)
@@ -27,26 +25,25 @@ class PIT:
     self.progresssmslinecolor   = (50,150,250)
     self.progressemaillinecolor = (50,250,150)
     self.histcontainer = historycontainer
-    self.displaymanager = displaymanager
+    #self.displaymanager = displaymanager
     self.w,self.h = get_screen_size()
     self.roundboxmargin = (45,10)
     #the contentmargin is for left and write, to and bottom
     self.contentmargin = (55,25)
     #the offset below the y margin
-    self.lineyoffset = 45
+    self.lineyoffset = 55
     #the offset below the y margin
-    self.imageyoffset = 60
+    self.imageyoffset = 70
     self.buttonsize = (40, 70)
     self.gpioManager = GpioManager()
-    self.gpioManager.leds_off()
+    #self.gpioManager.leds_off()
 
   def start_screen(self):
     self.init_pygame_and_screen()
-    self.init_touchscreen()
     self.get_next_previous_item(0)
 
     self.start_timer_from_new_items_check()
-    self.start_endless_touch_loop()
+    self.start_event_loop()
 
   def init_pygame_and_screen(self):
     pygame.init()
@@ -63,55 +60,17 @@ class PIT:
     self.draw_surrounding_rect()
     self.draw_line_below_top()
 
-  def init_touchscreen(self):
-    self.ts = ft5406.Touchscreen()
-    for touch in self.ts.touches:
-      touch.on_press = self.touch_handler
-      touch.on_release = self.touch_handler
-      #touch.on_move = touch_handler
-    self.ts.run()
-
-  def touch_handler(self, event, touch):
-    if event == TS_PRESS:
-      self.presspos=(touch.x,touch.y)
-      self.displaymanager.reset_timer()
-    if event == TS_RELEASE:
-      self.releasepos=(touch.x,touch.y)
-      res = self.check_swipe()
-      if res != 0:
-        self.get_next_previous_item(res)
-      #button pushed
-      else :
-        backbutton = pygame.Rect(
-          (0,self.h/2-self.buttonsize[1]/2),
-          self.buttonsize)
-        if backbutton.collidepoint(self.releasepos):
-          self.get_next_previous_item(-1)
-        else:
-          nextbutton = pygame.Rect(
-            (self.w-self.buttonsize[0],self.h/2-self.buttonsize[1]/2),
-            self.buttonsize)
-          if nextbutton.collidepoint(self.releasepos):
-            self.get_next_previous_item(1)
-            
-  
-  def check_swipe(self):
-    #dbgprint (self.presspos, self.releasepos)
-    #go back
-    if self.releasepos[0] - self.presspos[0] > 20:
-      return -1
-    #go further
-    if self.presspos[0] - self.releasepos[0] > 20:
-      return 1
-    return 0
-
-  def start_endless_touch_loop(self):
+  def start_event_loop(self):
     while True:
       for event in pygame.event.get():
+        #dbgprint("getting event:",event.type)
         if event.type == KEYDOWN:
           if event.key == K_ESCAPE:
-            self.ts.stop()
             sys.exit()
+          elif event.key == K_LEFT:
+            self.get_next_previous_item(-1)
+          elif event.key == K_RIGHT:
+            self.get_next_previous_item(1)
         if event.type == USEREVENT + 1:
           self.draw_left_right_buttons_if_needed()
         elif event.type == USEREVENT + 2: #sms progress
@@ -120,6 +79,10 @@ class PIT:
         elif event.type == USEREVENT + 3: #email progress
           #dbgprint("email event received!", event.__dict__['progress'])
           self.draw_progess_line('email',event.__dict__['progress'])
+        elif event.type == USEREVENT + 4: #button
+          self.get_next_previous_item(1)
+        elif event.type == USEREVENT + 5: #button
+          self.get_next_previous_item(-1)
 
   def start_timer_from_new_items_check(self):
     pygame.time.set_timer(USEREVENT+1, 2000)
@@ -204,9 +167,9 @@ class PIT:
     txt = "De: " + fromm
     if subject.strip() != "":
       txt+="\nSujet: "+ subject;
-    font = pygame.font.Font(None, 24)
+    font = pygame.font.Font(None, 34)
     height = font.size("g")[1]*2+1
-    rect = pygame.Rect((0,0, 600, height))
+    rect = pygame.Rect((0,0, 900, height))
     text_surface = self.render_textrect(txt, font, rect, (0, 0, 0), 0)
     self.screen.blit(text_surface,(offset[0],offset[1]))
     
@@ -297,6 +260,7 @@ class PIT:
             #raise TextRectException, "Invalid justification argument: " + str(justification)
         accumulated_height += font.size(line)[1]
       except:
+        dbgprint("ERROR in render_textrect")
         pass
 
     return surface
@@ -314,7 +278,7 @@ class PIT:
   def show_body (self,txt):
     offset = self.contentmargin
     self.clear_image_and_body()
-    font = pygame.font.Font(None, 24)
+    font = pygame.font.Font(None, 34)
     rect  = pygame.Rect(offset[0],self.imageyoffset+offset[1],
       self.w-offset[0]-offset[0],
       self.h-self.imageyoffset-offset[1]-offset[1])
@@ -356,15 +320,15 @@ class PIT:
     s2 = ""
     if self.histcontainer.has_next_item():
       if self.histcontainer.has_unread_items():
-        self.gpioManager.leds_on()
+        #self.gpioManager.leds_on()
         s2 = self.draw_button(0,(255,0,0))
       else:
-        self.gpioManager.leds_off()
+        #self.gpioManager.leds_off()
         s2 = self.draw_button(0)
     else:
       #dbgprint("clearing right")
-      if not self.histcontainer.has_unread_items():
-        self.gpioManager.leds_off()
+      #if not self.histcontainer.has_unread_items():
+        #self.gpioManager.leds_off()
       s2 = self.clear_button(0)
 
     self.screen.blit(s2,(self.w-s2.get_size()[0],self.h/2-s2.get_size()[1]/2))
@@ -427,27 +391,28 @@ class PIT:
 if __name__ == '__main__':
   
   historycontainer = HistElementContainer()
-  displaymanager   = DisplayManager()
+  #displaymanager   = DisplayManager()
 
   emailReader = EmailReader(historycontainer)
   #emailReader.fetch_mail()
 
   smsReader = SmsReader(historycontainer)
   #smsReader.fetch_smses()
+
   call_once(emailReader.fetch_mail)
   call_once(smsReader.fetch_smses)
 
   stop_fetch_mail = call_repeatedly(5*60,emailReader.fetch_mail)
   stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
-  stop_check_bl = call_repeatedly(10, displaymanager.check_for_sleep)
+  #stop_check_bl = call_repeatedly(10, displaymanager.check_for_sleep)
   try:
-    pit = PIT(historycontainer, displaymanager)
+    pit = PIT(historycontainer); #, displaymanager)
     #next doesn't return until escape is pressed
     pit.start_screen()
   finally:
-    stop_check_bl()
+    #stop_check_bl()
     stop_fetch_mail() 
     stop_fetch_sms()
-    del displaymanager
+    #del displaymanager
 
 
