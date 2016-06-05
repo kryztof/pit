@@ -396,15 +396,13 @@ if __name__ == '__main__':
   displaymanager   = DisplayManager()
 
   emailReader = EmailReader(historycontainer)
-
-  smsReader = SmsReader(historycontainer)
-
-  #non blocking
-  call_once(emailReader.fetch_mail)
-  call_once(smsReader.fetch_smses)
-
+  #call_once(emailReader.fetch_mail)
   stop_fetch_mail = call_repeatedly(10*60,emailReader.fetch_mail)
-  stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
+
+  #smsReader = SmsReader(historycontainer)
+  #call_once(smsReader.fetch_smses)
+  #stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
+
   stop_check_display = call_repeatedly(10, displaymanager.check_for_sleep)
   try:
     pit = PIT(historycontainer, displaymanager)
@@ -413,7 +411,7 @@ if __name__ == '__main__':
   finally:
     stop_check_display()
     stop_fetch_mail() 
-    stop_fetch_sms()
+    #stop_fetch_sms()
     del displaymanager
 
 

@@ -15,8 +15,11 @@ you should see :
 import time, threading
 import os
 from utils import *
-import ft5406
-from ft5406 import Touchscreen, TS_PRESS, TS_RELEASE, TS_MOVE
+try:
+  import ft5406
+  from ft5406 import Touchscreen, TS_PRESS, TS_RELEASE, TS_MOVE
+except:
+  pass
 
 class DisplayManager:
   def __init__(self):

@@ -280,9 +280,15 @@ class HistElement:
   def get_uid(self):     return self.uid
   def get_time(self):    return self.time
   def get_time_locale_fr(self):    
-    locale.setlocale(locale.LC_TIME,'fr_BE')
-    t = time.localtime(self.time)
-    return time.strftime("%d %b %Y à %Hh%M",t)
+    try:
+      locale.setlocale(locale.LC_TIME,'fr_BE')
+      t = time.localtime(self.time)
+      return time.strftime("%d %b %Y à %Hh%M",t)
+    except:
+      print("Failed to load locale. To install do:");
+      print("  in ubuntu in dash 'language' add support");
+      print("  then do 'sudo dpkg-reconfigure locales'");
+      return ""
   def get_type(self):    return self.typeke
   def get_date(self):    return self.date
   def get_from(self):    return self.fromm
@@ -364,14 +370,17 @@ class HistElement:
     if len(HistElement.gsmdict) >0 :
       return
     txt = ""
-    with open(self.gsm_path,'r') as fd:
-      for line in fd:
-        strs = line.split(" ")
-        gsm = strs[0].strip()
-        del strs[0]
-        name = " ".join(strs).strip()
-        if name != "":
-          HistElement.gsmdict[name]=gsm
+    if not os.path.isfile(self.gsm_path):
+      print("File",self.gsm_path, "doesn't exists")
+    else:
+      with open(self.gsm_path,'r') as fd:
+        for line in fd:
+          strs = line.split(" ")
+          gsm = strs[0].strip()
+          del strs[0]
+          name = " ".join(strs).strip()
+          if name != "":
+            HistElement.gsmdict[name]=gsm
 
   def find_name_of_gsmnummer(self,gsmstr):
     for name,gsm in HistElement.gsmdict.items():

@@ -1,17 +1,23 @@
 #!/usr/bin/python
 
-import RPi.GPIO as GPIO
+try:
+  import RPi.GPIO as GPIO
+except:
+  pass
 import pygame
 from utils import *
 
 
 class GpioManager:
   def __init__(self):
-    self.channels = [24,26]
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(self.channels, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    self.make_callbacks()
+    try:
+      self.channels = [24,26]
+      GPIO.setwarnings(False)
+      GPIO.setmode(GPIO.BOARD)
+      GPIO.setup(self.channels, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+      self.make_callbacks()
+    except:
+      print("No module RPi.GPIO")
 
   def make_callbacks(self):
     GPIO.add_event_detect(self.channels[0], GPIO.FALLING, callback = self.callback, bouncetime=100)

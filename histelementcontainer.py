@@ -9,7 +9,7 @@ from utils import *
 class HistElementContainer:
   def __init__(self):
     self.histelements = []
-    self.outputdir = "/home/pi/.pit"
+    self.outputdir = os.path.expanduser("~")+"/.pit"
     self.historyfilename = "history.txt"
     self.historypath = os.path.join(self.outputdir,self.historyfilename)
     self.actualelement = -1

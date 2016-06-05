@@ -3,8 +3,9 @@ import time
 import threading
 from threading import Event, Thread
 import os
+import re
 
-dbgfile="/home/pi/pit2/pit_dbg.log"
+dbgfile="pit_dbg.log"
 try: 
   os.remove(dbgfile)
 except:
@@ -39,8 +40,14 @@ def get_screen_size(real = 0):
   if debug == 1 and real == 0 : 
     return (400,220)
   else:
-    #return (800,480)
-    return (1360,768)
+    try:
+      f = os.popen("xdpyinfo  | grep dimensions")
+      n = f.read()
+      dim = re.split('\W+',n.strip())[1].split('x')
+      return (int(dim[0]),int(dim[1]))
+    except:
+      dbgprint("Failed to get screen dimensions")
+      return (400,220)
 
 def get_aspect_scale(width,height,maxwidth,maxheight):
   """ Scales 'img' to fit into box maxwidth/maxheight.
