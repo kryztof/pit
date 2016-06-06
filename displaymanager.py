@@ -68,6 +68,8 @@ class DisplayManager:
       self.fd.flush()
     else:
       os.system("/opt/vc/bin/tvservice -p")
+      os.system("chvt 9")
+      os.system("chvt 7")
 
   def display_off(self):
     #dbgprint("display off")

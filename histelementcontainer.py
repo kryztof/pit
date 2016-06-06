@@ -101,6 +101,7 @@ class HistElementContainer:
   def read_history(self):
     if os.path.exists(self.outputdir) == False:
       os.makedirs(self.outputdir)
+    dbgprint("history path is '",self.historypath,"'")
 
     fd = open(self.historypath,'a+')
     fd.seek(0)

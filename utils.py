@@ -5,7 +5,7 @@ from threading import Event, Thread
 import os
 import re
 
-dbgfile="pit_dbg.log"
+dbgfile=os.path.join(os.path.dirname(os.path.realpath(__file__)),"dbg.log")
 try: 
   os.remove(dbgfile)
 except:
@@ -47,7 +47,7 @@ def get_screen_size(real = 0):
       return (int(dim[0]),int(dim[1]))
     except:
       dbgprint("Failed to get screen dimensions")
-      return (400,220)
+      return (1600,1200)
 
 def get_aspect_scale(width,height,maxwidth,maxheight):
   """ Scales 'img' to fit into box maxwidth/maxheight.

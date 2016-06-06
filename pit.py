@@ -29,7 +29,7 @@ class PIT:
     self.w,self.h = get_screen_size()
     self.roundboxmargin = (45,10)
     #the contentmargin is for left and write, to and bottom
-    self.contentmargin = (55,25)
+    self.contentmargin = (67,25)
     #the offset below the y margin
     self.lineyoffset = 55
     #the offset below the y margin
@@ -396,7 +396,7 @@ if __name__ == '__main__':
   displaymanager   = DisplayManager()
 
   emailReader = EmailReader(historycontainer)
-  #call_once(emailReader.fetch_mail)
+  call_once(emailReader.fetch_mail)
   stop_fetch_mail = call_repeatedly(10*60,emailReader.fetch_mail)
 
   #smsReader = SmsReader(historycontainer)
