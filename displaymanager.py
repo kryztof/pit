@@ -54,7 +54,7 @@ class DisplayManager:
     if self.check_sleep_wait:
       now = time.time()
       dbgprint("now", now, "last action:", self.lastaction,"diff",str(int(now) - int(self.lastaction)))
-      if int(now) - int(self.lastaction) >= 1*30 :
+      if int(now) - int(self.lastaction) >= 10*60 :
         dbgprint("displaymanager times out ->display off")
         self.display_off()
 
