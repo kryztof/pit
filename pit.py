@@ -60,12 +60,18 @@ class PIT:
     self.draw_surrounding_rect()
     self.draw_line_below_top()
 
+  def user_event_happend(self):
+    dbgprint("user event happend")
+    self.displaymanager.reset_timer()
+
   def start_event_loop(self):
     while True:
       for event in pygame.event.get():
-        #dbgprint("getting event:",event.type)
         if event.type == KEYDOWN:
+          dbgprint("getting event:",event.type, "key", event.key)
+          self.user_event_happend()
           if event.key == K_ESCAPE:
+            dbgprint("exiting pit")
             sys.exit()
           elif event.key == K_LEFT:
             self.get_next_previous_item(-1)
@@ -74,17 +80,19 @@ class PIT:
         if event.type == USEREVENT + 1:
           self.draw_left_right_buttons_if_needed()
         elif event.type == USEREVENT + 2: #sms progress
-          #dbgprint("sms event received!", event.__dict__['progress'])
+          dbgprint("sms event received!", event.__dict__['progress'])
           self.draw_progess_line('sms',event.__dict__['progress'])
         elif event.type == USEREVENT + 3: #email progress
-          #dbgprint("email event received!", event.__dict__['progress'])
+          dbgprint("email event received!", event.__dict__['progress'])
           self.draw_progess_line('email',event.__dict__['progress'])
         elif event.type == USEREVENT + 4: #button
+          dbgprint("next button pressed!")
           self.get_next_previous_item(1)
-          self.displaymanager.reset_timer()
+          self.user_event_happend()
         elif event.type == USEREVENT + 5: #button
+          dbgprint("previous button pressed!")
           self.get_next_previous_item(-1)
-          self.displaymanager.reset_timer()
+          self.user_event_happend()
 
   def start_timer_from_new_items_check(self):
     pygame.time.set_timer(USEREVENT+1, 2000)
@@ -403,15 +411,14 @@ if __name__ == '__main__':
   #call_once(smsReader.fetch_smses)
   #stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
 
-  stop_check_display = call_repeatedly(10, displaymanager.check_for_sleep)
   try:
     pit = PIT(historycontainer, displaymanager)
     #next doesn't return until escape is pressed
     pit.start_screen()
   finally:
-    stop_check_display()
     stop_fetch_mail() 
     #stop_fetch_sms()
-    del displaymanager
+    displaymanager.reset_timer()
+    displaymanager.stop_check_display()
 
 

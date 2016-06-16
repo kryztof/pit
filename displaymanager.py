@@ -29,27 +29,37 @@ class DisplayManager:
       self.fd = open(self.blpowerpath,'r+')
     except:
       self.ft = False
-    self.lastaction = 0
+    self.lastaction = time.time()
     self.displaystate = 1 ; #1 in on, 0 is off
-
-    self.reset_timer()
-    self.check_for_sleep()
-
+    self.check_sleep_wait = False
+    #the delay introduced here is to make sure the device had time to 
+    #set its internal time -> there is no rtc
+    threading.Timer(30,self.start_check_for_sleep).start()
+    self.stop_check_display = call_repeatedly(10, self.check_for_sleep)
 
   def __del__(self):
     #dbgprint("del dm")
     #self.display_on() -> generate exception ...
+    #self.stop_check_display() -> doesn't work
     if self.ft:
       self.fd.close()
 
+  def start_check_for_sleep(self):
+    dbgprint("accepting to go to sleep")
+    self.reset_timer()
+    self.check_sleep_wait = True
+
+
   def check_for_sleep(self):
-    now = time.time()
-    #dbgprint("now", now, "last action:", self.lastaction)
-    if now - self.lastaction > 7*60 :
-      self.display_off()
+    if self.check_sleep_wait:
+      now = time.time()
+      dbgprint("now", now, "last action:", self.lastaction,"diff",str(int(now) - int(self.lastaction)))
+      if int(now) - int(self.lastaction) >= 1*30 :
+        dbgprint("displaymanager times out ->display off")
+        self.display_off()
 
   def reset_timer(self):
-    #dbgprint("reset timer", self.lastaction)
+    dbgprint("reset timer", self.lastaction)
     self.lastaction =  time.time(); #-> returns time in seconds
     if self.displaystate == 0 :
       self.display_on()
@@ -61,18 +71,20 @@ class DisplayManager:
         touch.on_press = self.display_on()
 
   def display_on(self):
-    #dbgprint("display on")
+    dbgprint("display on ", self.ft)
     self.displaystate = 1
     if self.ft:
       self.fd.write('0'); 
       self.fd.flush()
     else:
+      dbgprint("display on start")
       os.system("/opt/vc/bin/tvservice -p")
-      os.system("chvt 9")
-      os.system("chvt 7")
+      os.system("fbset -depth 2")
+      os.system("fbset -depth 16")
+      dbgprint("display on end")
 
   def display_off(self):
-    #dbgprint("display off")
+    dbgprint("display off")
     self.displaystate = 0
     if self.ft:
       self.fd.write('1'); 

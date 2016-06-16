@@ -33,6 +33,7 @@ def dbgprint(*arg):
   s = ' '.join(map(str,arg))
   print(s)
   dbgfp.write(s+'\n')
+  dbgfp.flush()
   #dbgfp.close()
 
 def get_screen_size(real = 0):
