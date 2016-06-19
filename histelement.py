@@ -130,7 +130,7 @@ class HistElement:
     self.fromm = smsgsm
     self.subject = ""
     self.read = 0
-    res = self.create_body(smscontent)
+    res = self.create_body_file_content(smscontent)
     return res
 
   def get_body_decode_info(self,body):
@@ -215,14 +215,17 @@ class HistElement:
     new_body = self.decode_body(new_body,charset,encoding)
     new_body = new_body.strip()
     #dbgprint("New_body 2 is",len(new_body), ":", new_body,"--")
-    if new_body != "":
-      #dbgprint("new_body:",new_body, "-")
+    create_body_file_content(new_body)
+
+  def create_body_file_content(self, decoded_bodytxt):
+    if decoded_bodytxt != "":
+      #dbgprint("decoded_bodytxt:",decoded_bodytxt, "-")
       filename = ""+str(self.uid)+"_body.txt"
       path = os.path.join(self.outputdir, filename )
       if os.path.isfile(path):
         os.remove(path)
       fp = open( path ,'a+',encoding='utf-8')
-      fp.write(new_body)
+      fp.write(decoded_bodytxt)
       fp.close()
       self.get_items(True)
       return 1
