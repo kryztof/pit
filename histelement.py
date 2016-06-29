@@ -215,7 +215,7 @@ class HistElement:
     new_body = self.decode_body(new_body,charset,encoding)
     new_body = new_body.strip()
     #dbgprint("New_body 2 is",len(new_body), ":", new_body,"--")
-    create_body_file_content(new_body)
+    self.create_body_file_content(new_body)
 
   def create_body_file_content(self, decoded_bodytxt):
     if decoded_bodytxt != "":

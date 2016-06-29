@@ -407,9 +407,9 @@ if __name__ == '__main__':
   call_once(emailReader.fetch_mail)
   stop_fetch_mail = call_repeatedly(10*60,emailReader.fetch_mail)
 
-  #smsReader = SmsReader(historycontainer)
-  #call_once(smsReader.fetch_smses)
-  #stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
+  smsReader = SmsReader(historycontainer)
+  call_once(smsReader.fetch_smses)
+  stop_fetch_sms  = call_repeatedly(60,smsReader.fetch_smses)
 
   try:
     pit = PIT(historycontainer, displaymanager)
@@ -417,7 +417,7 @@ if __name__ == '__main__':
     pit.start_screen()
   finally:
     stop_fetch_mail() 
-    #stop_fetch_sms()
+    stop_fetch_sms()
     displaymanager.reset_timer()
     displaymanager.stop_check_display()
 
