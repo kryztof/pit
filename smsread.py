@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import subprocess
 import string
 import urllib.request
@@ -116,8 +116,13 @@ class SmsReader:
 
   def post_progress(self, percentage):
     smsprogressevent = pygame.event.Event(pygame.USEREVENT+2, progress=percentage)
-    pygame.event.post(smsprogressevent)
+    try:
+      pygame.event.post(smsprogressevent)
+    except:
+      dbgprint("No Pygame -> not sending event")
+      
 
 #if __name__ == '__main__':
-#  smsReader = SmsReader()
+#  historycontainer = HistElementContainer()
+#  smsReader = SmsReader(historycontainer)
 #  smsReader.fetch_smses()
