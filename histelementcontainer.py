@@ -118,6 +118,9 @@ class HistElementContainer:
     self.actualelement=len(self.histelements)-1
     fd.close()
 
+  def set_last_element(self):
+    self.actualelement=len(self.histelements)-1
+
   def sort_history(self):
     self.histelements.sort(key=lambda x:x.time, reverse=False)
 
