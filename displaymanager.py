@@ -34,8 +34,9 @@ class DisplayManager:
     self.check_sleep_wait = False
     #the delay introduced here is to make sure the device had time to 
     #set its internal time -> there is no rtc
-    threading.Timer(30,self.start_check_for_sleep).start()
-    self.stop_check_display = call_repeatedly(10, self.check_for_sleep)
+    #for the moment disable screen poweroff
+    #threading.Timer(30,self.start_check_for_sleep).start()
+    #self.stop_check_display = call_repeatedly(10, self.check_for_sleep)
 
   def __del__(self):
     #dbgprint("del dm")
